@@ -10,11 +10,14 @@ function App() {
   const [hubsList, setHubsList] = useState([]); 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  
+  // 🔥 NEW STATE: Track the user's selected location filter
+  const [selectedLocation, setSelectedLocation] = useState('All');
+  
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
   
-  // 1. Tracks whether the full-screen portal layout is currently visible
   const [showAuthPortal, setShowAuthPortal] = useState(false);
 
   const fetchHubs = async () => {
@@ -39,19 +42,25 @@ function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) setShowAuthPortal(false); // Drop portal immediately upon login
+      if (session) setShowAuthPortal(false); 
     });
 
     fetchHubs();
     return () => subscription.unsubscribe();
   }, []);
 
+  // ⚙️ UPDATED LOGIC: Filters based on search text, categories, AND sub-county locations
   const filteredHubs = hubsList.filter(hub => {
     const matchesSearch = (hub.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                           (hub.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                           (hub.location?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    
     const matchesCategory = selectedCategory === 'All' || hub.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    
+    // Check if the hub area matches the selected filter location dropdown
+    const matchesLocation = selectedLocation === 'All' || hub.location === selectedLocation;
+    
+    return matchesSearch && matchesCategory && matchesLocation;
   });
 
   const handleLogout = async () => {
@@ -72,7 +81,6 @@ function App() {
           <div className="lg:col-span-3 order-2 lg:order-1">
             
             {showAuthPortal ? (
-              /* DYNAMIC REPLACEMENT: Clean Full-Screen Content Canvas */
               <div className="animate-fadeIn">
                 <Auth 
                   onAuthSuccess={() => setShowAuthPortal(false)} 
@@ -80,13 +88,15 @@ function App() {
                 />
               </div>
             ) : (
-              /* Standard Marketplace Catalog Interface */
               <>
+                {/* 🔍 UPDATED: Passing down location state hooks directly into SearchBar */}
                 <SearchBar 
                   searchTerm={searchTerm} 
                   setSearchTerm={setSearchTerm} 
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
+                  selectedLocation={selectedLocation}
+                  setSelectedLocation={setSelectedLocation}
                 />
                 
                 <div className="mb-6">
@@ -108,7 +118,7 @@ function App() {
                       ))
                     ) : (
                       <div className="col-span-full text-center py-16 text-slate-600 font-mono border border-dashed border-slate-900 rounded-2xl bg-slate-900/10">
-                        No active verified hubs listed here yet.
+                        No active verified hubs listed in this region yet.
                       </div>
                     )}
                   </div>
@@ -133,9 +143,9 @@ function App() {
               <button
                 onClick={() => {
                   if (session) {
-                    setIsModalOpen(true); // If logged in, pop open the clean submission form modal
+                    setIsModalOpen(true); 
                   } else {
-                    setShowAuthPortal(true); // If logged out, render split screen portal instantly!
+                    setShowAuthPortal(true); 
                   }
                 }}
                 className="mt-5 w-full bg-teal-500 text-slate-950 font-mono text-[11px] font-bold py-3 rounded-xl hover:bg-teal-400 hover:shadow-[0_0_15px_rgba(20,184,166,0.3)] transition-all duration-300 cursor-pointer uppercase tracking-wider"
@@ -157,7 +167,7 @@ function App() {
         </div>
       </main>
 
-      {/* FLOATING DIRECTORY ENTRY MODAL (ONLY RUNS FOR LOGGED IN USERS) */}
+      {/* FLOATING DIRECTORY ENTRY MODAL */}
       {isModalOpen && session && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-slate-950/60">
           <div className="bg-slate-900 border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">

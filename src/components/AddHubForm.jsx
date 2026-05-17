@@ -75,11 +75,19 @@ export default function AddHubForm({ onHubAdded }) {
         <option value="Hardware & Repair">Hardware & Repair</option>
       </select>
 
-      <input 
-        type="text" placeholder="Location (e.g., Nyali, Bamburi, CBD)" required
-        className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-teal-500/50"
-        value={location} onChange={(e) => setLocation(e.target.value)}
-      />
+      <select 
+  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-300 focus:outline-none focus:border-teal-500/50 cursor-pointer"
+  value={location} onChange={(e) => setLocation(e.target.value)}
+  required
+>
+  <option value="" disabled>Select Location (Sub-County)</option>
+  <option value="Mvita (CBD)">Mvita (CBD)</option>
+  <option value="Nyali">Nyali</option>
+  <option value="Kisauni">Kisauni</option>
+  <option value="Likoni">Likoni</option>
+  <option value="Changamwe">Changamwe</option>
+  <option value="Jomvu">Jomvu</option>
+</select>
 
       <textarea 
         placeholder="What services do you provide? (Description)" required rows="3"
