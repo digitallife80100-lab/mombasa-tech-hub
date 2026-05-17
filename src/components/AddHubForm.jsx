@@ -1,5 +1,4 @@
 import { useState } from 'react';
-// 1. Import the active Supabase client instance
 import { supabase } from '../supabaseClient'; 
 
 export default function AddHubForm({ onHubAdded }) {
@@ -16,8 +15,17 @@ export default function AddHubForm({ onHubAdded }) {
     e.preventDefault();
     setLoading(true);
 
-    // 2. LIVE CLOUD INSERTION: Pushing the form entries directly to Supabase
-    const { data, error } = await supabase
+    // 1. Fetch the currently authenticated user's ID from the session cache
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      alert('Authentication session expired. Please log in again.');
+      setLoading(false);
+      return;
+    }
+
+    // 2. Insert rows, including the active user_id string
+    const { error } = await supabase
       .from('hubs')
       .insert([{ 
         name, 
@@ -26,18 +34,18 @@ export default function AddHubForm({ onHubAdded }) {
         description, 
         contact,
         website_url: websiteUrl,
-        publisher_email: email
+        publisher_email: email,
+        user_id: user.id // <-- Connects this listing to the account owner permanently!
       }]);
 
     setLoading(false);
     
     if (error) {
-      // If the table doesn't exist yet, Supabase will tell us right here!
       alert('Database Error: ' + error.message);
     } else {
-      alert('🎉 Success! Your hub has been published to the live Mombasa database!');
+      alert('🎉 Success! Your listing has been submitted and sent to the moderation queue.');
       
-      // Reset all inputs cleanly
+      // Clear out fields completely
       setName('');
       setLocation('');
       setDescription('');
@@ -45,7 +53,7 @@ export default function AddHubForm({ onHubAdded }) {
       setWebsiteUrl(''); 
       setEmail(''); 
       
-      if (onHubAdded) onHubAdded(); // Close the modal smoothly
+      if (onHubAdded) onHubAdded(); 
     }
   };
 
@@ -101,7 +109,7 @@ export default function AddHubForm({ onHubAdded }) {
         type="submit" disabled={loading}
         className="bg-teal-500 text-slate-950 font-bold py-3 rounded-xl hover:bg-teal-400 transition-colors cursor-pointer mt-2 disabled:opacity-50 font-mono tracking-wider text-xs uppercase"
       >
-        {loading ? 'Publishing to Cloud...' : 'Publish to Directory'}
+        {loading ? 'Submitting to Queue...' : 'Submit Hub for Verification'}
       </button>
     </form>
   );
