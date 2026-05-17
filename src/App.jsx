@@ -4,20 +4,17 @@ import SearchBar from './components/SearchBar';
 import HubCard from './components/HubCard';
 import AddHubForm from './components/AddHubForm';
 import Auth from './components/Auth'; 
+import DirectoryMap from './components/DirectoryMap'; // 🔥 1. IMPORT THE MAP HERE
 import { supabase } from './supabaseClient'; 
 
 function App() {
   const [hubsList, setHubsList] = useState([]); 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  
-  // 🔥 NEW STATE: Track the user's selected location filter
   const [selectedLocation, setSelectedLocation] = useState('All');
-  
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
-  
   const [showAuthPortal, setShowAuthPortal] = useState(false);
 
   const fetchHubs = async () => {
@@ -49,17 +46,12 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // ⚙️ UPDATED LOGIC: Filters based on search text, categories, AND sub-county locations
   const filteredHubs = hubsList.filter(hub => {
     const matchesSearch = (hub.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                           (hub.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                           (hub.location?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-    
     const matchesCategory = selectedCategory === 'All' || hub.category === selectedCategory;
-    
-    // Check if the hub area matches the selected filter location dropdown
     const matchesLocation = selectedLocation === 'All' || hub.location === selectedLocation;
-    
     return matchesSearch && matchesCategory && matchesLocation;
   });
 
@@ -75,9 +67,10 @@ function App() {
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* 1. GLOBAL LAYOUT GRID: Left Canvas (3 Columns) vs Right Sidebar (1 Column) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           
-          {/* MAIN DIRECTORY OR AUTH PORTAL GRID VIEW */}
+          {/* ================= LEFT SIDE CANVAS (3 COLS) ================= */}
           <div className="lg:col-span-3 order-2 lg:order-1">
             
             {showAuthPortal ? (
@@ -88,8 +81,8 @@ function App() {
                 />
               </div>
             ) : (
+              /* Standard Full-Width Marketplace Catalog Interface */
               <>
-                {/* 🔍 UPDATED: Passing down location state hooks directly into SearchBar */}
                 <SearchBar 
                   searchTerm={searchTerm} 
                   setSearchTerm={setSearchTerm} 
@@ -111,6 +104,7 @@ function App() {
                     📡 Fetching live Mombasa market lines...
                   </div>
                 ) : (
+                  /* Main cards now grid out beautifully in a wide 2-column format */
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredHubs.length > 0 ? (
                       filteredHubs.map((hub) => (
@@ -127,8 +121,11 @@ function App() {
             )}
           </div>
 
-          {/* CALL TO ACTION SIDEBAR */}
-          <div className="lg:col-span-1 order-1 lg:order-2 lg:sticky lg:top-24">
+          {/* ================= RIGHT SIDEBAR (1 COL) ================= */}
+          {/* Sticky wrapper handles the absolute spacing constraints neatly */}
+          <div className="lg:col-span-1 order-1 lg:order-2 lg:sticky lg:top-24 flex flex-col gap-6">
+            
+            {/* CARD A: ADVERTISE SERVICES CONTROL PANEL */}
             <div className="bg-gradient-to-br from-slate-900 to-slate-900/40 border border-slate-800/80 p-6 rounded-2xl shadow-xl">
               <span className="text-[9px] font-mono font-bold tracking-widest text-teal-400 bg-teal-950/50 px-2 py-1 rounded border border-teal-900/30 uppercase">
                 {session ? 'Partner Active' : 'Open Source Market'}
@@ -162,6 +159,12 @@ function App() {
                 </button>
               )}
             </div>
+
+            {/* CARD B: INTERACTIVE MAP (Perfectly stacked underneath the details card) */}
+            <div className="w-full">
+              <DirectoryMap hubs={filteredHubs} selectedLocation={selectedLocation} />
+            </div>
+
           </div>
 
         </div>
@@ -192,5 +195,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
