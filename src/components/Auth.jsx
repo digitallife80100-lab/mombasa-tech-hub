@@ -16,7 +16,8 @@ export default function Auth({ onAuthSuccess, onCancel }) {
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) setMessage(`❌ ${error.message}`);
-      else setMessage('🎉 Account created successfully! You can now sign in.');
+      // 👇 UPDATE THIS MESSAGE HERE FOR REAL USERS
+      else setMessage('📩 Verification link sent! Please check your email inbox (and spam folder) to confirm your account before logging in.');
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setMessage(`❌ ${error.message}`);
