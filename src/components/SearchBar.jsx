@@ -1,57 +1,65 @@
+import React from 'react';
+import { translations } from '../utils/languages';
+
 export default function SearchBar({ 
   searchTerm, setSearchTerm, 
-  selectedCategory, setSelectedCategory,
-  selectedLocation, setSelectedLocation // <-- Receive new location state props
+  selectedCategory, setSelectedCategory, 
+  selectedLocation, setSelectedLocation,
+  lang = 'en'
 }) {
-  const categories = ['All', 'ICT Training', 'Web & Digital Agency', 'Community & Incubation', 'Hardware & Repair'];
-  const locations = ['All Locations', 'Mvita (CBD)', 'Nyali', 'Kisauni', 'Likoni', 'Changamwe', 'Jomvu'];
+  const t = translations[lang];
 
   return (
-    <div className="flex flex-col gap-4 mb-8 bg-slate-900/40 p-4 border border-slate-900 rounded-2xl backdrop-blur-md">
+    <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row gap-4 items-center transition-colors duration-300 w-full">
       
-      {/* Search Input field */}
-      <input
-        type="text"
-        placeholder="Search hubs by name or keywords..."
-        className="w-full bg-slate-950 border border-slate-800/80 rounded-xl px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-teal-500/40 transition-colors"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
-      {/* DUAL DROPDOWN SELECTION FILTERS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        
-        {/* Category Filter */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">Filter Category</label>
-          <select
-            className="w-full bg-slate-950 border border-slate-800/80 rounded-xl px-3 py-2.5 text-slate-300 text-xs focus:outline-none focus:border-teal-500/40 cursor-pointer"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Location Filter */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">Filter Area</label>
-          <select
-            className="w-full bg-slate-950 border border-slate-800/80 rounded-xl px-3 py-2.5 text-slate-300 text-xs focus:outline-none focus:border-teal-500/40 cursor-pointer"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-          >
-            {locations.map((loc) => (
-              <option key={loc} value={loc === 'All Locations' ? 'All' : loc}>
-                {loc}
-              </option>
-            ))}
-          </select>
-        </div>
-
+      <div className="w-full md:flex-1 relative">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={t.searchPlaceholder}
+          className="w-full bg-slate-950 text-white font-sans text-xs border border-slate-800/80 rounded-xl px-4 py-3 outline-none focus:border-teal-500 transition-colors"
+        />
       </div>
+
+      <div className="w-full md:w-48 flex flex-col gap-1">
+        <label className="text-[9px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+          {t.filterCategory}
+        </label>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="w-full bg-slate-950 text-slate-300 border border-slate-800/80 rounded-xl px-3 py-2.5 font-mono text-[11px] cursor-pointer outline-none"
+        >
+          <option value="All">{t.all}</option>
+          <option value="Web Agency">{t.categories.web}</option>
+          <option value="Video Editor">{t.categories.video}</option>
+          <option value="ICT Training">{t.categories.ict}</option>
+          <option value="Graphics Design">{t.categories.graphics}</option>
+          <option value="Community & Incubation">{t.categories.incubation}</option>
+          <option value="Hardware & Repair">{t.categories.repair}</option>
+        </select>
+      </div>
+
+      <div className="w-full md:w-48 flex flex-col gap-1">
+        <label className="text-[9px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+          {t.filterArea}
+        </label>
+        <select
+          value={selectedLocation}
+          onChange={(e) => setSelectedLocation(e.target.value)}
+          className="w-full bg-slate-950 text-slate-300 border border-slate-800/80 rounded-xl px-3 py-2.5 font-mono text-[11px] cursor-pointer outline-none"
+        >
+          <option value="All">{t.allLocations}</option>
+          <option value="Mvita">Mvita</option>
+          <option value="Nyali">Nyali</option>
+          <option value="Changamwe">Changamwe</option>
+          <option value="Kisauni">Kisauni</option>
+          <option value="Likoni">Likoni</option>
+          <option value="Jomvu">Jomvu</option>
+        </select>
+      </div>
+
     </div>
   );
 }
