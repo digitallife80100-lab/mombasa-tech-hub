@@ -7,6 +7,7 @@ import Auth from './components/Auth';
 import AddHubForm from './components/AddHubForm';
 import { supabase } from './supabaseClient'; // Ensure your client import is clean
 import { translations } from './utils/languages';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 export default function App() {
   // ==================== STATE MANAGEMENT ====================
@@ -20,6 +21,7 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedLocation, setSelectedLocation] = useState('All');
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false); // 🔥 Active State Engine
 
   // 🔥 CUSTOM CONTROLS FOR MULTI-THEME & SWAHILI LOCALIZATION
   const [lang, setLang] = useState('en'); 
@@ -114,14 +116,14 @@ export default function App() {
               <>
                 {/* Main Filter Action Bar Container */}
                 <SearchBar 
-  searchTerm={searchTerm} 
-  setSearchTerm={setSearchTerm} 
-  selectedCategory={selectedCategory}
-  setSelectedCategory={setSelectedCategory}
-  selectedLocation={selectedLocation}
-  setSelectedLocation={setSelectedLocation}
-  lang={lang} // 👈 FIRE THE LANGUAGE HOOK STRAIGHT DOWN HERE
-/>
+                  searchTerm={searchTerm} 
+                  setSearchTerm={setSearchTerm} 
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  selectedLocation={selectedLocation}
+                  setSelectedLocation={setSelectedLocation}
+                  lang={lang}
+                />
                 
                 {/* Dynamic Heading Title Counters */}
                 <div className="mb-6 mt-4">
@@ -140,7 +142,12 @@ export default function App() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredHubs.length > 0 ? (
                       filteredHubs.map((hub) => (
-                        <HubCard key={hub.id} hub={hub} />
+                        <HubCard 
+                          key={hub.id} 
+                          hub={hub} 
+                          lang={lang} 
+                          selectedLocation={selectedLocation} // 🔥 TRACKS CURRENT AREA FOR TELEMETRY
+                        />
                       ))
                     ) : (
                       <div className="col-span-full text-center py-16 text-slate-600 font-mono border border-dashed border-slate-900 rounded-2xl bg-slate-900/10">
@@ -186,6 +193,15 @@ export default function App() {
                   {t.signOut}
                 </button>
               )}
+
+              {session && (
+                <button
+                  onClick={() => setIsDashboardOpen(true)}
+                  className="mt-2 w-full text-center text-teal-400 hover:text-teal-300 font-mono text-[10px] uppercase tracking-wider transition-colors cursor-pointer block border border-teal-900/40 py-1.5 rounded-lg bg-teal-950/20"
+                >
+                  📊 {lang === 'sw' ? 'Angalia Metrics Zako' : 'View Live Insights'}
+                </button>
+              )}
             </div>
 
             {/* CARD B: INTERACTIVE SIDEBAR LEAFLET LOCAL RADAR MAP */}
@@ -220,6 +236,20 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* 🔥 NEW: FLOATING ANALYTICS INSIGHTS DASHBOARD MODAL */}
+      {isDashboardOpen && session && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-slate-950/70">
+          <div className="bg-slate-900 border border-slate-800 w-full max-w-xl p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto animate-fadeIn">
+            <AnalyticsDashboard 
+              session={session} 
+              lang={lang} 
+              onClose={() => setIsDashboardOpen(false)} 
+            />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
